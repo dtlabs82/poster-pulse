@@ -140,6 +140,15 @@ const EventForm: React.FC<EventFormProps> = ({ onSubmit, isLoading }) => {
     }
 
     onSubmit(formData);
+    
+    // Reset form after submission
+    if (!isLoading) {
+      setFormData(INITIAL_FORM_STATE);
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+        setPreviewUrl(null);
+      }
+    }
   };
 
   return (

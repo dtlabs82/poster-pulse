@@ -1,10 +1,19 @@
 
 import React from "react";
 import { Link } from "react-router-dom";
-import { MoonIcon, SunIcon, Search, Menu, X } from "lucide-react";
+import { MoonIcon, SunIcon, Search, Menu, X, LogOut, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useAuth } from "@/context/AuthContext";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface NavbarProps {
   isDarkMode: boolean;
@@ -21,6 +30,7 @@ const Navbar: React.FC<NavbarProps> = ({
 }) => {
   const isMobile = useIsMobile();
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+  const { user, profile, signOut, isAdmin } = useAuth();
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -69,9 +79,37 @@ const Navbar: React.FC<NavbarProps> = ({
           >
             {isDarkMode ? <SunIcon size={20} /> : <MoonIcon size={20} />}
           </Button>
-          <Button asChild variant="default">
-            <Link to="/admin">Admin Dashboard</Link>
-          </Button>
+          
+          {user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="gap-2">
+                  <User size={16} />
+                  {profile?.full_name || user.email}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link to="/admin" className="w-full cursor-pointer">
+                    Admin Dashboard
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  onClick={signOut}
+                  className="text-destructive cursor-pointer"
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Sign out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <Button asChild variant="default">
+              <Link to="/auth">Sign In</Link>
+            </Button>
+          )}
         </nav>
 
         {/* Mobile navigation */}
@@ -105,12 +143,30 @@ const Navbar: React.FC<NavbarProps> = ({
                     </span>
                   )}
                 </Button>
-                <Button asChild variant="default" size="sm">
+                {user ? (
+                  <Button 
+                    variant="destructive" 
+                    size="sm" 
+                    onClick={signOut}
+                    className="flex items-center gap-2"
+                  >
+                    <LogOut size={16} /> Sign Out
+                  </Button>
+                ) : (
+                  <Button asChild variant="default" size="sm">
+                    <Link to="/auth" onClick={() => setIsMenuOpen(false)}>
+                      Sign In
+                    </Link>
+                  </Button>
+                )}
+              </div>
+              {user && (
+                <Button asChild variant="outline" size="sm">
                   <Link to="/admin" onClick={() => setIsMenuOpen(false)}>
                     Admin Dashboard
                   </Link>
                 </Button>
-              </div>
+              )}
             </div>
           </div>
         )}

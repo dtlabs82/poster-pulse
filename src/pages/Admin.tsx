@@ -1,6 +1,6 @@
 
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import EventForm from "@/components/admin/EventForm";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,22 +8,37 @@ import { EventFormData } from "@/types";
 import { useDarkMode } from "@/hooks/use-dark-mode";
 import { toast } from "sonner";
 import { ChevronLeft } from "lucide-react";
+import { createEvent } from "@/services/eventService";
+import { useAuth } from "@/context/AuthContext";
+import { useQueryClient } from "@tanstack/react-query";
 
 const Admin = () => {
   const { isDarkMode, toggleDarkMode } = useDarkMode();
   const [isLoading, setIsLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const { user, profile, isLoading: authLoading } = useAuth();
+  const queryClient = useQueryClient();
+
+  // Redirect if not logged in
+  if (!authLoading && !user) {
+    return <Navigate to="/auth" />;
+  }
 
   const handleCreateEvent = async (formData: EventFormData) => {
-    // This would normally connect to Supabase
+    if (!user) {
+      toast.error("You must be logged in to create events");
+      return;
+    }
+
     try {
       setIsLoading(true);
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const newEvent = await createEvent(formData, user.id);
       
-      console.log("Event data to be saved:", formData);
-      toast.success("Event created successfully!");
-      // Reset form or redirect
+      if (newEvent) {
+        toast.success("Event created successfully!");
+        // Invalidate events query to refetch the list
+        queryClient.invalidateQueries({ queryKey: ['events'] });
+      }
     } catch (error) {
       console.error("Error creating event:", error);
       toast.error("Failed to create event");
@@ -31,6 +46,14 @@ const Admin = () => {
       setIsLoading(false);
     }
   };
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-muted-foreground">Loading...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col">

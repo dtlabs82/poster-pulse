@@ -8,16 +8,18 @@ import EventDetailsModal from "@/components/EventDetailsModal";
 import { useDarkMode } from "@/hooks/use-dark-mode";
 import { Event } from "@/types";
 import { sortEvents, filterEvents } from "@/lib/utils";
-import { mockEvents } from "@/mock-data";
+import { useEvents } from "@/hooks/use-events";
+import { useAuth } from "@/context/AuthContext";
 
 const Index = () => {
   const { isDarkMode, toggleDarkMode } = useDarkMode();
-  const [events, setEvents] = useState<Event[]>(mockEvents);
+  const { events, isLoading } = useEvents();
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [sortOption, setSortOption] = useState("dateDesc");
+  const { user, profile, signOut } = useAuth();
 
   const filteredEvents = filterEvents(events, searchQuery, selectedCategory);
   const sortedEvents = sortEvents(filteredEvents, sortOption);
@@ -41,29 +43,37 @@ const Index = () => {
       />
 
       <main className="flex-1 container mx-auto py-6">
-        <FeaturedEvents
-          events={events}
-          onEventClick={handleEventClick}
-        />
-
-        <div className="mb-6">
-          <div className="flex items-center justify-between mb-4 px-4">
-            <h2 className="text-2xl font-bold">All Events</h2>
+        {isLoading ? (
+          <div className="flex justify-center items-center h-64">
+            <p className="text-muted-foreground">Loading events...</p>
           </div>
+        ) : (
+          <>
+            <FeaturedEvents
+              events={events.filter(event => event.featured)}
+              onEventClick={handleEventClick}
+            />
 
-          <EventFilters
-            events={events}
-            selectedCategory={selectedCategory}
-            setSelectedCategory={setSelectedCategory}
-            sortOption={sortOption}
-            setSortOption={setSortOption}
-          />
+            <div className="mb-6">
+              <div className="flex items-center justify-between mb-4 px-4">
+                <h2 className="text-2xl font-bold">All Events</h2>
+              </div>
 
-          <EventsGrid
-            events={sortedEvents}
-            onEventClick={handleEventClick}
-          />
-        </div>
+              <EventFilters
+                events={events}
+                selectedCategory={selectedCategory}
+                setSelectedCategory={setSelectedCategory}
+                sortOption={sortOption}
+                setSortOption={setSortOption}
+              />
+
+              <EventsGrid
+                events={sortedEvents}
+                onEventClick={handleEventClick}
+              />
+            </div>
+          </>
+        )}
       </main>
 
       <EventDetailsModal

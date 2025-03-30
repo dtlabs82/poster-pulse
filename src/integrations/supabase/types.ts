@@ -9,16 +9,140 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      events: {
+        Row: {
+          category: Database["public"]["Enums"]["event_category"]
+          created_at: string
+          created_by: string
+          date: string
+          description: string
+          featured: boolean | null
+          id: string
+          image_url: string | null
+          organizer: string
+          registration_link: string
+          time: string
+          title: string
+          updated_at: string
+          venue: string
+        }
+        Insert: {
+          category?: Database["public"]["Enums"]["event_category"]
+          created_at?: string
+          created_by: string
+          date: string
+          description: string
+          featured?: boolean | null
+          id?: string
+          image_url?: string | null
+          organizer: string
+          registration_link: string
+          time: string
+          title: string
+          updated_at?: string
+          venue: string
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["event_category"]
+          created_at?: string
+          created_by?: string
+          date?: string
+          description?: string
+          featured?: boolean | null
+          id?: string
+          image_url?: string | null
+          organizer?: string
+          registration_link?: string
+          time?: string
+          title?: string
+          updated_at?: string
+          venue?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          full_name: string | null
+          id: string
+          role: Database["public"]["Enums"]["user_role"]
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          full_name?: string | null
+          id: string
+          role?: Database["public"]["Enums"]["user_role"]
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["user_role"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      registrations: {
+        Row: {
+          event_id: string
+          id: string
+          registered_at: string
+          student_email: string
+          student_name: string
+        }
+        Insert: {
+          event_id: string
+          id?: string
+          registered_at?: string
+          student_email: string
+          student_name: string
+        }
+        Update: {
+          event_id?: string
+          id?: string
+          registered_at?: string
+          student_email?: string
+          student_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "registrations_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_admin: {
+        Args: {
+          user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      event_category:
+        | "General"
+        | "Academic"
+        | "Cultural"
+        | "Sports"
+        | "Workshop"
+        | "Seminar"
+        | "Conference"
+        | "Competition"
+        | "Other"
+      user_role: "admin" | "student"
     }
     CompositeTypes: {
       [_ in never]: never

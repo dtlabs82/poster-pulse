@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -14,6 +14,10 @@ import { Event } from "@/types";
 import { formatDate } from "@/lib/utils";
 import { Calendar, Clock, MapPin, User, ExternalLink, BookmarkPlus, Share2 } from "lucide-react";
 import { toast } from "sonner";
+import { registerForEvent } from "@/services/eventService";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
+import { useAuth } from "@/context/AuthContext";
 
 interface EventDetailsModalProps {
   event: Event | null;
@@ -26,6 +30,12 @@ const EventDetailsModal: React.FC<EventDetailsModalProps> = ({
   isOpen,
   onClose,
 }) => {
+  const { user } = useAuth();
+  const [isRegistering, setIsRegistering] = useState(false);
+  const [registrationEmail, setRegistrationEmail] = useState("");
+  const [registrationName, setRegistrationName] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   if (!event) return null;
 
   const handleBookmark = () => {
@@ -65,6 +75,32 @@ const EventDetailsModal: React.FC<EventDetailsModalProps> = ({
       // Fallback for browsers that don't support the Web Share API
       navigator.clipboard.writeText(window.location.href);
       toast.success("Link copied to clipboard");
+    }
+  };
+
+  const handleRegistration = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!event) return;
+
+    try {
+      setIsSubmitting(true);
+      const success = await registerForEvent(
+        event.id,
+        registrationName,
+        registrationEmail
+      );
+
+      if (success) {
+        toast.success("Registration successful!");
+        setIsRegistering(false);
+        setRegistrationName("");
+        setRegistrationEmail("");
+      }
+    } catch (error) {
+      console.error("Error registering for event:", error);
+      toast.error("Failed to register for event");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -119,6 +155,45 @@ const EventDetailsModal: React.FC<EventDetailsModalProps> = ({
               {event.description}
             </p>
           </div>
+
+          {isRegistering ? (
+            <form onSubmit={handleRegistration} className="space-y-4 border rounded-md p-4">
+              <h3 className="font-medium">Register for this event</h3>
+              <div className="space-y-2">
+                <Label htmlFor="name">Full Name</Label>
+                <Input
+                  id="name"
+                  value={registrationName}
+                  onChange={(e) => setRegistrationName(e.target.value)}
+                  placeholder="Your full name"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={registrationEmail}
+                  onChange={(e) => setRegistrationEmail(e.target.value)}
+                  placeholder="Your email address"
+                  required
+                />
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => setIsRegistering(false)}
+                >
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={isSubmitting}>
+                  {isSubmitting ? "Registering..." : "Complete Registration"}
+                </Button>
+              </div>
+            </form>
+          ) : null}
         </div>
 
         <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
@@ -130,9 +205,15 @@ const EventDetailsModal: React.FC<EventDetailsModalProps> = ({
               <Share2 size={18} />
             </Button>
           </div>
-          <Button onClick={openRegistrationLink} className="gap-2">
-            Register Now <ExternalLink size={16} />
-          </Button>
+          {event.registrationLink ? (
+            <Button onClick={openRegistrationLink} className="gap-2">
+              Register via Google Form <ExternalLink size={16} />
+            </Button>
+          ) : (
+            <Button onClick={() => setIsRegistering(true)} className="gap-2" disabled={isRegistering}>
+              Register Now
+            </Button>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>
