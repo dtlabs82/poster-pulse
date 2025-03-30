@@ -17,3 +17,12 @@ export interface Event {
 export type EventFormData = Omit<Event, "id" | "createdAt" | "imageUrl"> & {
   image: File | null;
 };
+
+export interface Profile {
+  id: string;
+  avatar_url: string | null;
+  full_name: string | null;
+  role: "admin" | "student";
+  created_at: string;
+  updated_at: string;
+}
