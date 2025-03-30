@@ -61,6 +61,11 @@ export const createEvent = async (formData: EventFormData, userId: string): Prom
       .from('event_posters')
       .getPublicUrl(filePath);
 
+    // Convert string category to proper enum value
+    // This ensures we're using the correct type for the category field
+    const categoryValue = formData.category as "General" | "Academic" | "Cultural" | 
+      "Sports" | "Workshop" | "Seminar" | "Conference" | "Competition" | "Other";
+
     // Insert event into database
     const { data, error } = await supabase
       .from('events')
@@ -70,7 +75,7 @@ export const createEvent = async (formData: EventFormData, userId: string): Prom
         date: formData.date,
         time: formData.time,
         venue: formData.venue,
-        category: formData.category,
+        category: categoryValue,
         organizer: formData.organizer,
         registration_link: formData.registrationLink,
         image_url: urlData.publicUrl,

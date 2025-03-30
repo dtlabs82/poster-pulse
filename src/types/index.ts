@@ -6,7 +6,7 @@ export interface Event {
   date: string;
   time: string;
   venue: string;
-  category: string;
+  category: "General" | "Academic" | "Cultural" | "Sports" | "Workshop" | "Seminar" | "Conference" | "Competition" | "Other";
   organizer: string;
   registrationLink: string;
   imageUrl: string;
