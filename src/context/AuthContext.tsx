@@ -26,39 +26,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      
-      if (session?.user) {
-        fetchUserProfile(session.user.id);
-      } else {
-        setIsLoading(false);
-      }
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        
-        if (session?.user) {
-          setTimeout(() => {
-            fetchUserProfile(session.user.id);
-          }, 0);
-        } else {
-          setProfile(null);
-          setIsLoading(false);
-        }
-      }
-    );
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, []);
-
+  // Separated fetchUserProfile function outside of useEffect
   const fetchUserProfile = async (userId: string) => {
     try {
       setIsLoading(true);
@@ -80,6 +48,48 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    // First effect: Get initial session
+    const getInitialSession = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        setSession(session);
+        setUser(session?.user ?? null);
+        
+        if (session?.user) {
+          fetchUserProfile(session.user.id);
+        } else {
+          setIsLoading(false);
+        }
+      } catch (error) {
+        console.error("Error getting initial session:", error);
+        setIsLoading(false);
+      }
+    };
+
+    getInitialSession();
+
+    // Second part: Subscribe to auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+        
+        if (session?.user) {
+          fetchUserProfile(session.user.id);
+        } else {
+          setProfile(null);
+          setIsLoading(false);
+        }
+      }
+    );
+
+    // Cleanup subscription
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
 
   const signIn = async (email: string, password: string) => {
     try {
