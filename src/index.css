@@ -127,3 +127,9 @@
     height: 100%;
   }
 }
+
+/* Custom beam animation */
+@keyframes beam-animation {
+  0% { transform: translateY(100vh) translateX(-50%); }
+  100% { transform: translateY(-100%) translateX(-50%); }
+}

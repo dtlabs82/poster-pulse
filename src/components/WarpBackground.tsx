@@ -1,6 +1,5 @@
 
 import { cn } from "@/lib/utils";
-import { motion } from "motion/react";
 import React, { HTMLAttributes, useCallback, useMemo } from "react";
 
 interface WarpBackgroundProps extends HTMLAttributes<HTMLDivElement> {
@@ -14,6 +13,7 @@ interface WarpBackgroundProps extends HTMLAttributes<HTMLDivElement> {
   gridColor?: string;
 }
 
+// Create a simpler Beam component that doesn't rely on motion
 const Beam = ({
   width,
   x,
@@ -29,24 +29,24 @@ const Beam = ({
   const ar = Math.floor(Math.random() * 10) + 1;
 
   return (
-    <motion.div
-      style={
-        {
-          "--x": `${x}`,
-          "--width": `${width}`,
-          "--aspect-ratio": `${ar}`,
-          "--background": `linear-gradient(hsl(${hue} 80% 60%), transparent)`,
-        } as React.CSSProperties
-      }
-      className={`absolute left-[var(--x)] top-0 [aspect-ratio:1/var(--aspect-ratio)] [background:var(--background)] [width:var(--width)]`}
-      initial={{ y: "100cqmax", x: "-50%" }}
-      animate={{ y: "-100%", x: "-50%" }}
-      transition={{
-        duration,
-        delay,
-        repeat: Infinity,
-        ease: "linear",
-      }}
+    <div
+      style={{
+        "--x": `${x}`,
+        "--width": `${width}`,
+        "--aspect-ratio": `${ar}`,
+        "--background": `linear-gradient(hsl(${hue} 80% 60%), transparent)`,
+        "--delay": `${delay}s`,
+        "--duration": `${duration}s`,
+        left: `var(--x)`,
+        top: 0,
+        aspectRatio: `1/var(--aspect-ratio)`,
+        background: `var(--background)`,
+        width: `var(--width)`,
+        position: "absolute",
+        transform: "translateX(-50%)",
+        animation: `beam-animation var(--duration) var(--delay) infinite linear`,
+      } as React.CSSProperties}
+      className="beam"
     />
   );
 };
@@ -82,19 +82,31 @@ export const WarpBackground: React.FC<WarpBackgroundProps> = ({
   const bottomBeams = useMemo(() => generateBeams(), [generateBeams]);
   const leftBeams = useMemo(() => generateBeams(), [generateBeams]);
 
+  // Add keyframes style to the component
+  React.useEffect(() => {
+    // Add the animation keyframes if they don't exist yet
+    if (!document.getElementById('beam-animation-keyframes')) {
+      const styleSheet = document.createElement('style');
+      styleSheet.id = 'beam-animation-keyframes';
+      styleSheet.textContent = `
+        @keyframes beam-animation {
+          0% { transform: translateY(100vh) translateX(-50%); }
+          100% { transform: translateY(-100%) translateX(-50%); }
+        }
+      `;
+      document.head.appendChild(styleSheet);
+    }
+  }, []);
+
   return (
     <div className={cn("relative rounded border p-20", className)} {...props}>
       <div
-        style={
-          {
-            "--perspective": `${perspective}px`,
-            "--grid-color": gridColor,
-            "--beam-size": `${beamSize}%`,
-          } as React.CSSProperties
-        }
-        className={
-          "pointer-events-none absolute left-0 top-0 size-full overflow-hidden [clip-path:inset(0)] [container-type:size] [perspective:var(--perspective)] [transform-style:preserve-3d]"
-        }
+        style={{
+          "--perspective": `${perspective}px`,
+          "--grid-color": gridColor,
+          "--beam-size": `${beamSize}%`,
+        } as React.CSSProperties}
+        className="pointer-events-none absolute left-0 top-0 size-full overflow-hidden [clip-path:inset(0)] [container-type:size] [perspective:var(--perspective)] [transform-style:preserve-3d]"
       >
         {/* top side */}
         <div className="absolute [transform-style:preserve-3d] [background-size:var(--beam-size)_var(--beam-size)] [background:linear-gradient(var(--grid-color)_0_1px,_transparent_1px_var(--beam-size))_50%_-0.5px_/var(--beam-size)_var(--beam-size),linear-gradient(90deg,_var(--grid-color)_0_1px,_transparent_1px_var(--beam-size))_50%_50%_/var(--beam-size)_var(--beam-size)] [container-type:inline-size] [height:100cqmax] [transform-origin:50%_0%] [transform:rotateX(-90deg)] [width:100cqi]">
