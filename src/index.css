@@ -133,3 +133,10 @@
   0% { transform: translateY(100vh) translateX(-50%); }
   100% { transform: translateY(-100%) translateX(-50%); }
 }
+
+/* Custom pulse animation for dots */
+@keyframes pulse-dot {
+  0% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.5); }
+  100% { opacity: 0.4; transform: scale(1); }
+}

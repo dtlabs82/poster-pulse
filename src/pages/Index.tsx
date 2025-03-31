@@ -5,6 +5,7 @@ import FeaturedEvents from "@/components/FeaturedEvents";
 import EventsGrid from "@/components/EventsGrid";
 import EventFilters from "@/components/EventFilters";
 import EventDetailsModal from "@/components/EventDetailsModal";
+import DotPattern from "@/components/DotPattern";
 import { useDarkMode } from "@/hooks/use-dark-mode";
 import { Event } from "@/types";
 import { sortEvents, filterEvents } from "@/lib/utils";
@@ -34,7 +35,18 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col relative">
+      {/* Dot pattern background */}
+      <div className="absolute inset-0 overflow-hidden">
+        <DotPattern
+          width={20}
+          height={20}
+          glow={true}
+          className="text-primary/20 dark:text-primary/10"
+          cr={1.5}
+        />
+      </div>
+
       <Navbar
         isDarkMode={isDarkMode}
         toggleDarkMode={toggleDarkMode}
@@ -42,7 +54,7 @@ const Index = () => {
         setSearchQuery={setSearchQuery}
       />
 
-      <main className="container mx-auto py-6 flex-1">
+      <main className="container mx-auto py-6 flex-1 relative z-10">
         {isLoading ? (
           <div className="flex justify-center items-center h-64">
             <p className="text-muted-foreground">Loading events...</p>
@@ -82,10 +94,10 @@ const Index = () => {
         onClose={closeModal}
       />
 
-      <footer className="bg-muted py-6">
+      <footer className="bg-muted py-6 relative z-10">
         <div className="container mx-auto px-4 text-center">
           <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} College Event Manager
+            © {new Date().getFullYear()} Sathyabama Events
           </p>
         </div>
       </footer>

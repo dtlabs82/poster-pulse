@@ -43,8 +43,12 @@ const Navbar: React.FC<NavbarProps> = ({
           to="/"
           className="flex items-center gap-2 text-lg font-bold text-foreground"
         >
-          <span className="text-primary">Poster</span>
-          <span className="text-accent">Pulse</span>
+          <img 
+            src="/lovable-uploads/e7349dc1-0d50-4b36-8c35-e0120847aa65.png" 
+            alt="Sathyabama University" 
+            className="h-10 w-auto"
+          />
+          <span className="hidden md:block">Sathyabama Events</span>
         </Link>
 
         {/* Mobile menu button */}
