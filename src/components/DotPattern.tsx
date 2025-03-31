@@ -2,6 +2,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import { motion } from "@motionone/react";
 import React, { useEffect, useId, useRef, useState } from "react";
 
 /**
@@ -56,6 +57,7 @@ interface DotPatternProps extends React.SVGProps<SVGSVGElement> {
  * - The component is client-side only ("use client")
  * - Automatically responds to container size changes
  * - When glow is enabled, dots will animate with random delays and durations
+ * - Uses Motion for animations
  * - Dots color can be controlled via the text color utility classes
  */
 
@@ -123,19 +125,32 @@ export function DotPattern({
         </radialGradient>
       </defs>
       {dots.map((dot, index) => (
-        <circle
+        <motion.circle
           key={`${dot.x}-${dot.y}`}
           cx={dot.x}
           cy={dot.y}
           r={cr}
           fill={glow ? `url(#${id}-gradient)` : "currentColor"}
           className="text-neutral-400/80"
-          style={
+          initial={glow ? { opacity: 0.4, scale: 1 } : {}}
+          animate={
             glow
               ? {
-                  animation: `pulse-dot ${dot.duration}s ease-in-out ${dot.delay}s infinite alternate`,
+                  opacity: [0.4, 1, 0.4],
+                  scale: [1, 1.5, 1],
                 }
-              : undefined
+              : {}
+          }
+          transition={
+            glow
+              ? {
+                  duration: dot.duration,
+                  repeat: Infinity,
+                  repeatType: "reverse",
+                  delay: dot.delay,
+                  ease: "easeInOut",
+                }
+              : {}
           }
         />
       ))}
