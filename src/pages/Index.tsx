@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Navbar from "@/components/Navbar";
 import FeaturedEvents from "@/components/FeaturedEvents";
 import EventsGrid from "@/components/EventsGrid";
@@ -10,6 +10,7 @@ import { Event } from "@/types";
 import { sortEvents, filterEvents } from "@/lib/utils";
 import { useEvents } from "@/hooks/use-events";
 import { useAuth } from "@/context/AuthContext";
+import WarpBackground from "@/components/WarpBackground";
 
 const Index = () => {
   const { isDarkMode, toggleDarkMode } = useDarkMode();
@@ -42,39 +43,48 @@ const Index = () => {
         setSearchQuery={setSearchQuery}
       />
 
-      <main className="flex-1 container mx-auto py-6">
-        {isLoading ? (
-          <div className="flex justify-center items-center h-64">
-            <p className="text-muted-foreground">Loading events...</p>
-          </div>
-        ) : (
-          <>
-            <FeaturedEvents
-              events={events.filter(event => event.featured)}
-              onEventClick={handleEventClick}
-            />
-
-            <div className="mb-6">
-              <div className="flex items-center justify-between mb-4 px-4">
-                <h2 className="text-2xl font-bold">All Events</h2>
-              </div>
-
-              <EventFilters
-                events={events}
-                selectedCategory={selectedCategory}
-                setSelectedCategory={setSelectedCategory}
-                sortOption={sortOption}
-                setSortOption={setSortOption}
-              />
-
-              <EventsGrid
-                events={sortedEvents}
+      <WarpBackground 
+        className="flex-1 border-none p-0"
+        beamsPerSide={4}
+        beamSize={4}
+        beamDuration={5}
+        perspective={200}
+        gridColor={isDarkMode ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)"}
+      >
+        <main className="container mx-auto py-6">
+          {isLoading ? (
+            <div className="flex justify-center items-center h-64">
+              <p className="text-muted-foreground">Loading events...</p>
+            </div>
+          ) : (
+            <>
+              <FeaturedEvents
+                events={events.filter(event => event.featured)}
                 onEventClick={handleEventClick}
               />
-            </div>
-          </>
-        )}
-      </main>
+
+              <div className="mb-6">
+                <div className="flex items-center justify-between mb-4 px-4">
+                  <h2 className="text-2xl font-bold">All Events</h2>
+                </div>
+
+                <EventFilters
+                  events={events}
+                  selectedCategory={selectedCategory}
+                  setSelectedCategory={setSelectedCategory}
+                  sortOption={sortOption}
+                  setSortOption={setSortOption}
+                />
+
+                <EventsGrid
+                  events={sortedEvents}
+                  onEventClick={handleEventClick}
+                />
+              </div>
+            </>
+          )}
+        </main>
+      </WarpBackground>
 
       <EventDetailsModal
         event={selectedEvent}
